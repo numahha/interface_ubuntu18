@@ -1,0 +1,36 @@
+--- dpg0101.bak	2019-12-29 14:48:42.634368072 +0900
++++ dpg0101.c	2019-12-29 14:52:45.055240469 +0900
+@@ -17,7 +17,8 @@
+ #include <linux/ioport.h>
+ #include <linux/pci.h>
+ #include <linux/delay.h>
+-#include <asm/uaccess.h>
++//#include <asm/uaccess.h>
++#include <linux/uaccess.h>
+ #include <asm/errno.h>
+ #include <asm/ioctl.h>
+ #include "dpg0101.h"
+@@ -325,3 +325,4 @@
+ #if (LINUX_VERSION_CODE >= VERSION(2,6,36))
+-int ifdevmgr_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
++//int ifdevmgr_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
++long ifdevmgr_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
+ #else
+@@ -720,7 +722,8 @@
+ /* ******************************************** */
+ static struct file_operations dpg_fops = {
+ #if (LINUX_VERSION_CODE >= VERSION(2,4,0))
+-	THIS_MODULE,
++	//THIS_MODULE,
++	.owner = THIS_MODULE,
+ #endif /* MODULE */
+ 	.read = ifdevmgr_read,	/* read    */
+ #if (LINUX_VERSION_CODE >= VERSION(2,6,36))
+@@ -783,3 +786,6 @@
+ 		   DPG0101_DRIVER_VERSION);
+ 	}
+ }
++
++MODULE_LICENSE("GPL");
++
+

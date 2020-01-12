@@ -1,0 +1,51 @@
+--- penc_drventry.bak	2019-12-29 15:05:31.699323118 +0900
++++ penc_drventry.c	2019-12-29 15:08:53.001568491 +0900
+@@ -48,6 +48,11 @@
+ #include "penc_pcitbl.h"
+ #endif
+ 
++inline long interruptible_sleep_on_timeout(wait_queue_head_t * q, long timeout)
++{
++	return wait_event_interruptible_timeout(*q, 0, timeout);
++}
++
+ typedef struct {
+ 	spinlock_t            lock;    // spin lock object
+ 	struct fasync_struct *fasync;  // fasync information struct
+@@ -119,7 +124,8 @@
+ void gpg_penc_init_timer(void *ext)
+ {
+ 	PPENC_EXTERNAL_STRUCT pExt = (PPENC_EXTERNAL_STRUCT)ext;
+-	init_timer(&(pExt->timer));
++	//init_timer(&(pExt->timer));
++	timer_setup(&(pExt->timer),NULL,0);
+ }
+ 
+ /************************************************/
+@@ -130,7 +136,7 @@
+ {
+ 	PPENC_EXTERNAL_STRUCT pExt = (PPENC_EXTERNAL_STRUCT)ext;
+ 	pExt->timer.function = function;
+-	pExt->timer.data = data;
++	//pExt->timer.data = data;
+ 	pExt->timer.expires = expires;
+ 	add_timer(&(pExt->timer));
+ }
+@@ -489,7 +495,8 @@
+ /* ioctl system call                            */
+ /************************************************/
+ #if (LINUX_VERSION_CODE >= VERSION(2,6,36))
+-static int penc_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
++//static int penc_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
++static long penc_ioctl(struct file *file, unsigned int iocmd, unsigned long ioarg)
+ #else
+ static int penc_ioctl(struct inode *inode, struct file *file, unsigned int iocmd, unsigned long ioarg)
+ #endif
+@@ -608,3 +615,6 @@
+ 	}
+ 	
+ }
++
++MODULE_LICENSE("GPL");
++
+

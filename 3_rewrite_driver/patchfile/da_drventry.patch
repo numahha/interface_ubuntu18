@@ -1,0 +1,60 @@
+--- da_drventry.bak	2019-12-29 15:00:02.342663753 +0900
++++ da_drventry.c	2019-12-29 15:04:33.475857172 +0900
+@@ -97,6 +97,11 @@
+ #include <linux/moduleparam.h>
+ #endif
+ 
++inline long interruptible_sleep_on_timeout(wait_queue_head_t * q, long timeout)
++{
++	return wait_event_interruptible_timeout(*q, 0, timeout);
++}
++
+ typedef struct {
+ 	spinlock_t            lock;       // spin lock object
+ 	struct fasync_struct *fasync;     // fasync information struct
+@@ -198,7 +203,8 @@
+ void gpg_da_init_timer(void *ext)
+ {
+ 	PDA_EXTERNAL_STRUCT pExt = (PDA_EXTERNAL_STRUCT)ext;
+-	init_timer(&(pExt->timer));
++	//init_timer(&(pExt->timer));
++	timer_setup(&(pExt->timer),NULL,0);
+ }
+ 
+ /************************************************/
+@@ -208,7 +214,7 @@
+ {
+ 	PDA_EXTERNAL_STRUCT pExt = (PDA_EXTERNAL_STRUCT)ext;
+ 	pExt->timer.function = function;
+-	pExt->timer.data = data;
++	//pExt->timer.data = data;
+ 	pExt->timer.expires = expires;
+ 	add_timer(&(pExt->timer));
+ }
+@@ -266,7 +272,8 @@
+  ************************************************/
+ int gpg_da_MINOR_f(void *file)
+ {
+-	return MINOR(((struct file *)file)->f_dentry->d_inode->i_rdev);
++	//return MINOR(((struct file *)file)->f_dentry->d_inode->i_rdev);
++	return MINOR(((struct file *)file)->f_path.dentry->d_inode->i_rdev);
+ }
+ 
+ /************************************************
+@@ -1306,7 +1313,8 @@
+  ************************************************/
+ static struct file_operations da_fops = {
+ #if (LINUX_VERSION_CODE >= VERSION(2,4,0))
+-  THIS_MODULE,
++  //THIS_MODULE,
++  .owner = THIS_MODULE,
+ #endif
+ #if (LINUX_VERSION_CODE >= VERSION(2,6,36))
+ 	.unlocked_ioctl = da_ioctl,
+@@ -1389,3 +1397,5 @@
+ 	}
+ }
+ 
++MODULE_LICENSE("GPL");
++
+
